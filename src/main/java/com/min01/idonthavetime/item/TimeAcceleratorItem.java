@@ -101,9 +101,9 @@ public class TimeAcceleratorItem extends Item
 	    {
 		    if(p_41433_.isShiftKeyDown())
 		    {
-		    	if(tag.getInt(TICKRATE) > 11) 
+		    	if(tag.getInt(TICKRATE) > 1) 
 		    	{
-		    		tag.putInt(TICKRATE, tag.getInt(TICKRATE) - 10);
+		    		tag.putInt(TICKRATE, tag.getInt(TICKRATE) - 1);
 		    		this.secondsToSkip = tag.getInt(TICKRATE);
 		    	}
 				if(p_41433_ instanceof ServerPlayer serverPlayer)
@@ -111,7 +111,7 @@ public class TimeAcceleratorItem extends Item
 					serverPlayer.connection.send(new ClientboundSetActionBarTextPacket(Component.translatable("time_acceleator.changed_acceleration_second", this.secondsToSkip)));
 				}
 		    }
-		    else if(tag.getInt(TICKRATE) < 41)
+		    else if(tag.getInt(TICKRATE) < 11)
 		    {
 		    	tag.putInt(TICKRATE, tag.getInt(TICKRATE) + 10);
 		    	this.secondsToSkip = tag.getInt(TICKRATE);
