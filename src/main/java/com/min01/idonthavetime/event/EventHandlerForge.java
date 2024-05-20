@@ -23,7 +23,7 @@ public class EventHandlerForge
 	{
 		ItemStack stack = event.getItemStack();
 		Player player = event.getEntity();
-		if(stack.getItem() instanceof TimeAcceleratorItem item)
+		if(stack.getItem() instanceof TimeAcceleratorItem item && player.isShiftKeyDown())
 		{
 			if(item.getAccelerationMode(stack) == AccelerationMode.SINGLE)
 			{

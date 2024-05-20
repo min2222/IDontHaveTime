@@ -23,12 +23,14 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.CreativeModeTab;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.TooltipFlag;
 import net.minecraft.world.item.context.UseOnContext;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.entity.BlockEntityTicker;
 import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.phys.Vec3;
 import net.minecraft.world.phys.HitResult.Type;
 
 public class TimeAcceleratorItem extends Item
@@ -155,6 +157,7 @@ public class TimeAcceleratorItem extends Item
 			{
 				MobEffectInstance instance = new MobEffectInstance(MobEffects.MOVEMENT_SLOWDOWN, 40, 100, false, false, false);
 				t.addEffect(new MobEffectInstance(instance));
+				t.setDeltaMovement(Vec3.ZERO);
 				TimerUtil.setTickrate(t, 20 + this.secondsToSkip);
 				if(!t.getPersistentData().contains(TICKRATE_MODIFIED))
 				{
@@ -210,5 +213,13 @@ public class TimeAcceleratorItem extends Item
 			}
 		}
 		return false;
+	}
+	
+	@Override
+	public void appendHoverText(ItemStack p_41421_, Level p_41422_, List<Component> p_41423_, TooltipFlag p_41424_)
+	{
+		p_41423_.add(Component.translatable("item.idonthavetime.time_acceleator.desc1"));
+		p_41423_.add(Component.translatable("item.idonthavetime.time_acceleator.desc2"));
+		p_41423_.add(Component.translatable("item.idonthavetime.time_acceleator.desc3"));
 	}
 }

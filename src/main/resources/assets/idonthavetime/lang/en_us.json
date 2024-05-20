@@ -1,5 +1,8 @@
 {
 	"item.idonthavetime.time_accelerator": "Time Accelerator",
 	"time_acceleator.changed_acceleration_mode": "Changed Acceleration Mode to %1$s",
-	"time_acceleator.changed_acceleration_second": "Accelerating %1$s seconds"
+	"time_acceleator.changed_acceleration_second": "Accelerating %1$s seconds",
+	"item.idonthavetime.time_acceleator.desc1": "Left click block while sneak to change acceleration mode",
+	"item.idonthavetime.time_acceleator.desc2": "Right click empty space to increase seconds to skip",
+	"item.idonthavetime.time_acceleator.desc3": "Shift right click empty space to decrease seconds to skip"
 }
