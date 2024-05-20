@@ -135,7 +135,7 @@ public class TimeAcceleratorItem extends Item
 		{
 			MobEffectInstance instance = new MobEffectInstance(MobEffects.MOVEMENT_SLOWDOWN, 40, 100, false, false, false);
 			p_41400_.addEffect(new MobEffectInstance(instance));
-			TimerUtil.setTickrate(p_41400_, this.secondsToSkip * 20);
+			TimerUtil.setTickrate(p_41400_, 20 + this.secondsToSkip);
 			if(!p_41400_.getPersistentData().contains(TICKRATE_MODIFIED))
 			{
 				p_41400_.getPersistentData().putBoolean(TICKRATE_MODIFIED, true);
@@ -155,7 +155,7 @@ public class TimeAcceleratorItem extends Item
 			{
 				MobEffectInstance instance = new MobEffectInstance(MobEffects.MOVEMENT_SLOWDOWN, 40, 100, false, false, false);
 				t.addEffect(new MobEffectInstance(instance));
-				TimerUtil.setTickrate(t, this.secondsToSkip * 20);
+				TimerUtil.setTickrate(t, 20 + this.secondsToSkip);
 				if(!t.getPersistentData().contains(TICKRATE_MODIFIED))
 				{
 					t.getPersistentData().putBoolean(TICKRATE_MODIFIED, true);
