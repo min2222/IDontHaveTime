@@ -134,7 +134,7 @@ public class TimeAcceleratorItem extends Item
 		}
 		if(!(p_41400_ instanceof Player))
 		{
-			MobEffectInstance instance = new MobEffectInstance(MobEffects.MOVEMENT_SLOWDOWN, 40, 100, false, false, false);
+			MobEffectInstance instance = new MobEffectInstance(MobEffects.MOVEMENT_SLOWDOWN, 510, 100, false, false, false);
 			p_41400_.addEffect(new MobEffectInstance(instance));
 			TimerUtil.setTickrate(p_41400_, 20 + this.secondsToSkip);
 			if(!p_41400_.getPersistentData().contains(TICKRATE_MODIFIED))
@@ -154,7 +154,7 @@ public class TimeAcceleratorItem extends Item
 			list.removeIf(t -> t instanceof Player || t == p_41406_ || t instanceof Monster || t instanceof Enemy);
 			list.forEach(t -> 
 			{
-				MobEffectInstance instance = new MobEffectInstance(MobEffects.MOVEMENT_SLOWDOWN, 40, 100, false, false, false);
+				MobEffectInstance instance = new MobEffectInstance(MobEffects.MOVEMENT_SLOWDOWN, 510, 100, false, false, false);
 				t.addEffect(new MobEffectInstance(instance));
 				TimerUtil.setTickrate(t, 20 + this.secondsToSkip);
 				if(!t.getPersistentData().contains(TICKRATE_MODIFIED))

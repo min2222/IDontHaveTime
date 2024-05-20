@@ -10,7 +10,6 @@ import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
-import net.minecraftforge.event.entity.living.LivingEvent.LivingTickEvent;
 import net.minecraftforge.event.entity.living.MobEffectEvent;
 import net.minecraftforge.event.entity.player.PlayerInteractEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
@@ -35,16 +34,6 @@ public class EventHandlerForge
 				item.setAccelerationMode(stack, player, AccelerationMode.SINGLE);
 			}
 			event.setCanceled(true);
-		}
-	}
-	
-	@SubscribeEvent
-	public static void onLivingTick(LivingTickEvent event)
-	{
-		LivingEntity living = event.getEntity();
-		if(living.getPersistentData().contains(TimeAcceleratorItem.TICKRATE_MODIFIED))
-		{
-			living.setDeltaMovement(0, living.getDeltaMovement().y, 0);
 		}
 	}
 	
