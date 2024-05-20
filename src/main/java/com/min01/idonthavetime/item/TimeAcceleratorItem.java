@@ -150,14 +150,15 @@ public class TimeAcceleratorItem extends Item
 			List<LivingEntity> list = p_41405_.getEntitiesOfClass(LivingEntity.class, p_41406_.getBoundingBox().inflate(this.areaRadius, 0, this.areaRadius));
 			list.removeIf(t -> t instanceof Player || t == p_41406_ || t instanceof Monster || t instanceof Enemy);
 
-			int random = (int)Math.floor(Math.random() * list.size());
-			LivingEntity living = list.get(random);
-			if(!TimerUtil.hasTimer(living) && !living.getPersistentData().contains(TICKRATE_MODIFIED));
+			for(LivingEntity living : list)
 			{
-				MobEffectInstance instance = new MobEffectInstance(MobEffects.MOVEMENT_SLOWDOWN, 510, 100, false, false, false);
-				living.addEffect(new MobEffectInstance(instance));
-				living.getPersistentData().putBoolean(TICKRATE_MODIFIED, true);
-				TimerUtil.setTickrate(living, 20 + this.secondsToSkip);
+				if(!TimerUtil.hasTimer(living) && !living.getPersistentData().contains(TICKRATE_MODIFIED));
+				{
+					MobEffectInstance instance = new MobEffectInstance(MobEffects.MOVEMENT_SLOWDOWN, 510, 100, false, false, false);
+					living.addEffect(new MobEffectInstance(instance));
+					living.getPersistentData().putBoolean(TICKRATE_MODIFIED, true);
+					TimerUtil.setTickrate(living, 20 + this.secondsToSkip);
+				}
 			}
 		}
 	}
