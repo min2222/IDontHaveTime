@@ -2,8 +2,6 @@ package com.min01.idonthavetime.item;
 
 import java.util.List;
 
-import com.min01.entitytimer.TimerUtil;
-
 import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
@@ -36,7 +34,6 @@ public class TimeAcceleratorItem extends Item
 {
 	protected int secondsToSkip = 60;
 	protected int areaRadius = 10;
-	public static final String TICKRATE_MODIFIED = "TickrateModified";
 	public static final String TICKRATE = "Tickrate";
 	
 	public enum AccelerationMode
@@ -136,10 +133,9 @@ public class TimeAcceleratorItem extends Item
 		{
 			MobEffectInstance instance = new MobEffectInstance(MobEffects.MOVEMENT_SLOWDOWN, 510, 100, false, false, false);
 			p_41400_.addEffect(new MobEffectInstance(instance));
-			TimerUtil.setTickrate(p_41400_, 20 + this.secondsToSkip);
-			if(!p_41400_.getPersistentData().contains(TICKRATE_MODIFIED))
+			for(int i = 0; i < this.secondsToSkip * 20; i++)
 			{
-				p_41400_.getPersistentData().putBoolean(TICKRATE_MODIFIED, true);
+				p_41400_.tick();
 			}
 		}
 		return InteractionResult.SUCCESS;
@@ -156,10 +152,9 @@ public class TimeAcceleratorItem extends Item
 			{
 				MobEffectInstance instance = new MobEffectInstance(MobEffects.MOVEMENT_SLOWDOWN, 510, 100, false, false, false);
 				t.addEffect(new MobEffectInstance(instance));
-				TimerUtil.setTickrate(t, 20 + this.secondsToSkip);
-				if(!t.getPersistentData().contains(TICKRATE_MODIFIED))
+				for(int i = 0; i < this.secondsToSkip * 20; i++)
 				{
-					t.getPersistentData().putBoolean(TICKRATE_MODIFIED, true);
+					t.tick();
 				}
 			});
 		}
