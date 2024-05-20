@@ -30,7 +30,6 @@ import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.entity.BlockEntityTicker;
 import net.minecraft.world.level.block.state.BlockState;
-import net.minecraft.world.phys.Vec3;
 import net.minecraft.world.phys.HitResult.Type;
 
 public class TimeAcceleratorItem extends Item
@@ -157,7 +156,6 @@ public class TimeAcceleratorItem extends Item
 			{
 				MobEffectInstance instance = new MobEffectInstance(MobEffects.MOVEMENT_SLOWDOWN, 40, 100, false, false, false);
 				t.addEffect(new MobEffectInstance(instance));
-				t.setDeltaMovement(Vec3.ZERO);
 				TimerUtil.setTickrate(t, 20 + this.secondsToSkip);
 				if(!t.getPersistentData().contains(TICKRATE_MODIFIED))
 				{

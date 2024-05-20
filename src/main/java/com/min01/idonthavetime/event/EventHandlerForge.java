@@ -10,6 +10,7 @@ import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
+import net.minecraftforge.event.entity.living.LivingEvent.LivingTickEvent;
 import net.minecraftforge.event.entity.living.MobEffectEvent;
 import net.minecraftforge.event.entity.player.PlayerInteractEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
@@ -38,6 +39,16 @@ public class EventHandlerForge
 	}
 	
 	@SubscribeEvent
+	public static void onLivingTick(LivingTickEvent event)
+	{
+		LivingEntity living = event.getEntity();
+		if(living.getPersistentData().contains(TimeAcceleratorItem.TICKRATE_MODIFIED))
+		{
+			living.setDeltaMovement(0, living.getDeltaMovement().y, 0);
+		}
+	}
+	
+	@SubscribeEvent
 	public static void onMobEffectExpired(MobEffectEvent.Expired event)
 	{
 		MobEffect effect = event.getEffectInstance().getEffect();
@@ -45,6 +56,7 @@ public class EventHandlerForge
 		if(effect == MobEffects.MOVEMENT_SLOWDOWN && living.getPersistentData().contains(TimeAcceleratorItem.TICKRATE_MODIFIED))
 		{
 			TimerUtil.resetTickrate(living);
+			living.getPersistentData().remove(TimeAcceleratorItem.TICKRATE_MODIFIED);
 		}
 	}
 }
