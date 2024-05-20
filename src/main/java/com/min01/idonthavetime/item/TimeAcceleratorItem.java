@@ -2,6 +2,8 @@ package com.min01.idonthavetime.item;
 
 import java.util.List;
 
+import com.min01.entitytimer.TimerUtil;
+
 import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
@@ -35,6 +37,7 @@ public class TimeAcceleratorItem extends Item
 	protected int secondsToSkip = 60;
 	protected int areaRadius = 10;
 	public static final String TICKRATE = "Tickrate";
+	public static final String TICKRATE_MODIFIED = "TickrateModified";
 	
 	public enum AccelerationMode
 	{
@@ -129,14 +132,12 @@ public class TimeAcceleratorItem extends Item
 		{
 			return InteractionResult.PASS;
 		}
-		if(!(p_41400_ instanceof Player))
+		if(!(p_41400_ instanceof Player) && !p_41400_.getPersistentData().contains(TICKRATE_MODIFIED))
 		{
 			MobEffectInstance instance = new MobEffectInstance(MobEffects.MOVEMENT_SLOWDOWN, 510, 100, false, false, false);
-			p_41400_.addEffect(new MobEffectInstance(instance));
-			for(int i = 0; i < this.secondsToSkip * 20; i++)
-			{
-				p_41400_.tick();
-			}
+			p_41400_.addEffect(instance);
+			p_41400_.getPersistentData().putBoolean(TICKRATE_MODIFIED, true);
+			TimerUtil.setTickrate(p_41400_, 20 + this.secondsToSkip);
 		}
 		return InteractionResult.SUCCESS;
 	}
@@ -146,17 +147,18 @@ public class TimeAcceleratorItem extends Item
 	{
 		if(this.getAccelerationMode(p_41404_) == AccelerationMode.AREA)
 		{
-			List<LivingEntity> list = p_41405_.getEntitiesOfClass(LivingEntity.class, p_41406_.getBoundingBox().inflate(this.areaRadius));
+			List<LivingEntity> list = p_41405_.getEntitiesOfClass(LivingEntity.class, p_41406_.getBoundingBox().inflate(this.areaRadius, 0, this.areaRadius));
 			list.removeIf(t -> t instanceof Player || t == p_41406_ || t instanceof Monster || t instanceof Enemy);
-			list.forEach(t -> 
+
+			int random = (int)Math.floor(Math.random() * list.size());
+			LivingEntity living = list.get(random);
+			if(!TimerUtil.hasTimer(living) && !living.getPersistentData().contains(TICKRATE_MODIFIED));
 			{
 				MobEffectInstance instance = new MobEffectInstance(MobEffects.MOVEMENT_SLOWDOWN, 510, 100, false, false, false);
-				t.addEffect(new MobEffectInstance(instance));
-				for(int i = 0; i < this.secondsToSkip * 20; i++)
-				{
-					t.tick();
-				}
-			});
+				living.addEffect(new MobEffectInstance(instance));
+				living.getPersistentData().putBoolean(TICKRATE_MODIFIED, true);
+				TimerUtil.setTickrate(living, 20 + this.secondsToSkip);
+			}
 		}
 	}
 	
