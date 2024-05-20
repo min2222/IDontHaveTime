@@ -33,6 +33,7 @@ public class EventHandlerForge
 			{
 				item.setAccelerationMode(stack, player, AccelerationMode.SINGLE);
 			}
+			event.setCanceled(true);
 		}
 	}
 	

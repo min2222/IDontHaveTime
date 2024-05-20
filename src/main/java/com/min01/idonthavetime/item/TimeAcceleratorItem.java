@@ -17,6 +17,7 @@ import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.monster.Enemy;
 import net.minecraft.world.entity.monster.Monster;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.CreativeModeTab;
@@ -28,12 +29,14 @@ import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.entity.BlockEntityTicker;
 import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.phys.HitResult.Type;
 
 public class TimeAcceleratorItem extends Item
 {
 	protected int secondsToSkip = 60;
 	protected int areaRadius = 10;
 	public static final String TICKRATE_MODIFIED = "TickrateModified";
+	public static final String TICKRATE = "Tickrate";
 	
 	public enum AccelerationMode
 	{
@@ -91,7 +94,32 @@ public class TimeAcceleratorItem extends Item
 	@Override
 	public InteractionResultHolder<ItemStack> use(Level p_41432_, Player p_41433_, InteractionHand p_41434_) 
 	{
-	    ItemStack stack = p_41433_.getItemInHand(p_41434_);
+	    ItemStack stack = p_41433_.getMainHandItem();
+	    CompoundTag tag = stack.getOrCreateTag();
+	    if(p_41433_.pick(p_41433_.getAttackRange(), 0, true).getType() == Type.MISS)
+	    {
+		    if(p_41433_.isShiftKeyDown())
+		    {
+		    	if(tag.getInt(TICKRATE) > 11) 
+		    	{
+		    		tag.putInt(TICKRATE, tag.getInt(TICKRATE) - 10);
+		    		this.secondsToSkip = tag.getInt(TICKRATE);
+		    	}
+				if(p_41433_ instanceof ServerPlayer serverPlayer)
+				{
+					serverPlayer.connection.send(new ClientboundSetActionBarTextPacket(Component.translatable("time_acceleator.changed_acceleration_second", this.secondsToSkip)));
+				}
+		    }
+		    else if(tag.getInt(TICKRATE) < 491)
+		    {
+		    	tag.putInt(TICKRATE, tag.getInt(TICKRATE) + 10);
+		    	this.secondsToSkip = tag.getInt(TICKRATE);
+				if(p_41433_ instanceof ServerPlayer serverPlayer)
+				{
+					serverPlayer.connection.send(new ClientboundSetActionBarTextPacket(Component.translatable("time_acceleator.changed_acceleration_second", this.secondsToSkip)));
+				}
+		    }
+	    }
 		return InteractionResultHolder.fail(stack);
 	}
 	
@@ -105,7 +133,7 @@ public class TimeAcceleratorItem extends Item
 		}
 		if(!(p_41400_ instanceof Player))
 		{
-			MobEffectInstance instance = new MobEffectInstance(MobEffects.MOVEMENT_SLOWDOWN, 510, 100, false, false, false);
+			MobEffectInstance instance = new MobEffectInstance(MobEffects.MOVEMENT_SLOWDOWN, 40, 100, false, false, false);
 			p_41400_.addEffect(new MobEffectInstance(instance));
 			TimerUtil.setTickrate(p_41400_, this.secondsToSkip * 20);
 			if(!p_41400_.getPersistentData().contains(TICKRATE_MODIFIED))
@@ -113,7 +141,7 @@ public class TimeAcceleratorItem extends Item
 				p_41400_.getPersistentData().putBoolean(TICKRATE_MODIFIED, true);
 			}
 		}
-		return super.interactLivingEntity(p_41398_, p_41399_, p_41400_, p_41401_);
+		return InteractionResult.SUCCESS;
 	}
 	
 	@Override
@@ -122,10 +150,10 @@ public class TimeAcceleratorItem extends Item
 		if(this.getAccelerationMode(p_41404_) == AccelerationMode.AREA)
 		{
 			List<LivingEntity> list = p_41405_.getEntitiesOfClass(LivingEntity.class, p_41406_.getBoundingBox().inflate(this.areaRadius));
-			list.removeIf(t -> t instanceof Player || t == p_41406_ || t instanceof Monster);
+			list.removeIf(t -> t instanceof Player || t == p_41406_ || t instanceof Monster || t instanceof Enemy);
 			list.forEach(t -> 
 			{
-				MobEffectInstance instance = new MobEffectInstance(MobEffects.MOVEMENT_SLOWDOWN, 510, 100, false, false, false);
+				MobEffectInstance instance = new MobEffectInstance(MobEffects.MOVEMENT_SLOWDOWN, 40, 100, false, false, false);
 				t.addEffect(new MobEffectInstance(instance));
 				TimerUtil.setTickrate(t, this.secondsToSkip * 20);
 				if(!t.getPersistentData().contains(TICKRATE_MODIFIED))
@@ -149,7 +177,7 @@ public class TimeAcceleratorItem extends Item
 		}
 		if(player instanceof ServerPlayer serverPlayer)
 		{
-			serverPlayer.connection.send(new ClientboundSetActionBarTextPacket(Component.translatable("time_acceleator.change_acceleration_type", type.name)));
+			serverPlayer.connection.send(new ClientboundSetActionBarTextPacket(Component.translatable("time_acceleator.changed_acceleration_mode", type.name)));
 		}
 		tag.putBoolean(type.name, true);
 	}
@@ -169,15 +197,18 @@ public class TimeAcceleratorItem extends Item
 	{
 		BlockState blockState = level.getBlockState(pos);
 		BlockEntity blockEntity = level.getBlockEntity(pos);
-		BlockEntityTicker<BlockEntity> ticker = (BlockEntityTicker<BlockEntity>) blockEntity.getBlockState().getTicker(level, blockEntity.getType());
-		if(!blockState.hasBlockEntity() || blockEntity == null || blockEntity.isRemoved() || ticker == null)
+		if(blockState.hasBlockEntity() && blockEntity != null && !blockEntity.isRemoved())
 		{
-			return false;
+			BlockEntityTicker<BlockEntity> ticker = (BlockEntityTicker<BlockEntity>) blockEntity.getBlockState().getTicker(level, blockEntity.getType());
+			if(ticker != null)
+			{
+				for(int i = 0; i < this.secondsToSkip * 20; i++)
+				{
+					ticker.tick(level, pos, blockEntity.getBlockState(), blockEntity); 
+				}
+				return true;
+			}
 		}
-		for(int i = 0; i < this.secondsToSkip * 20; i++)
-		{
-			ticker.tick(level, pos, blockEntity.getBlockState(), blockEntity); 
-		}
-		return true;
+		return false;
 	}
 }
