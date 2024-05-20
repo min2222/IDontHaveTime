@@ -34,7 +34,7 @@ import net.minecraft.world.phys.HitResult.Type;
 
 public class TimeAcceleratorItem extends Item
 {
-	protected int secondsToSkip = 50;
+	protected int secondsToSkip = 10;
 	protected int areaRadius = 10;
 	public static final String TICKRATE = "Tickrate";
 	public static final String TICKRATE_MODIFIED = "TickrateModified";
@@ -111,9 +111,9 @@ public class TimeAcceleratorItem extends Item
 					serverPlayer.connection.send(new ClientboundSetActionBarTextPacket(Component.translatable("time_acceleator.changed_acceleration_second", this.secondsToSkip)));
 				}
 		    }
-		    else if(tag.getInt(TICKRATE) < 11)
+		    else if(tag.getInt(TICKRATE) < 10)
 		    {
-		    	tag.putInt(TICKRATE, tag.getInt(TICKRATE) + 10);
+		    	tag.putInt(TICKRATE, tag.getInt(TICKRATE) + 1);
 		    	this.secondsToSkip = tag.getInt(TICKRATE);
 				if(p_41433_ instanceof ServerPlayer serverPlayer)
 				{
