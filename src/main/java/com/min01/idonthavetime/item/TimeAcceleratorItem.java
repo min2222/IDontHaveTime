@@ -2,8 +2,6 @@ package com.min01.idonthavetime.item;
 
 import java.util.List;
 
-import com.min01.entitytimer.TimerUtil;
-
 import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
@@ -18,6 +16,8 @@ import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.monster.Enemy;
+import net.minecraft.world.entity.monster.Monster;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.CreativeModeTab;
 import net.minecraft.world.item.Item;
@@ -34,7 +34,7 @@ import net.minecraft.world.phys.HitResult.Type;
 public class TimeAcceleratorItem extends Item
 {
 	protected int secondsToSkip = 500;
-	protected int areaRadius = 10;
+	protected int areaRadius = 5;
 	public static final String TICKRATE = "Tickrate";
 	public static final String TICKRATE_MODIFIED = "TickrateModified";
 	
@@ -67,23 +67,11 @@ public class TimeAcceleratorItem extends Item
 		{
 			return InteractionResult.SUCCESS;
 		}
+		if(!level.isClientSide && this.accelerateRandomTick(state.getBlock(), level, pos))
+		{
+			return InteractionResult.SUCCESS;
+		}
 	    return InteractionResult.PASS;
-	}
-	
-	@Override
-	public InteractionResult useOn(UseOnContext p_41427_) 
-	{
-		Level level = p_41427_.getLevel();
-		BlockPos pos = p_41427_.getClickedPos();
-	    BlockState state = level.getBlockState(pos);
-	    if(!level.isClientSide)
-	    {
-	    	if(this.accelerateRandomTick(state, level, pos))
-	    	{
-		    	return InteractionResult.SUCCESS;
-	    	}
-	    }
-		return InteractionResult.PASS;
 	}
 	
 	@Override
@@ -130,8 +118,10 @@ public class TimeAcceleratorItem extends Item
 		{
 			MobEffectInstance instance = new MobEffectInstance(MobEffects.MOVEMENT_SLOWDOWN, 510, 100, false, false, false);
 			p_41400_.addEffect(instance);
-			p_41400_.getPersistentData().putBoolean(TICKRATE_MODIFIED, true);
-			TimerUtil.setTickrate(p_41400_, this.secondsToSkip * 20);
+			for(int i = 0; i < this.secondsToSkip * 20; i++)
+			{
+				p_41400_.tick(); 
+			}
 		}
 		return InteractionResult.SUCCESS;
 	}
@@ -141,18 +131,17 @@ public class TimeAcceleratorItem extends Item
 	{
 		if(this.getAccelerationMode(p_41404_) == AccelerationMode.AREA)
 		{
-			/*List<LivingEntity> list = p_41405_.getEntitiesOfClass(LivingEntity.class, p_41406_.getBoundingBox().inflate(this.areaRadius, 0, this.areaRadius));
+			List<LivingEntity> list = p_41405_.getEntitiesOfClass(LivingEntity.class, p_41406_.getBoundingBox().inflate(this.areaRadius, 0, this.areaRadius));
 			list.removeIf(t -> t instanceof Player || t == p_41406_ || t instanceof Monster || t instanceof Enemy);
 			list.forEach(t -> 
 			{
-				if(!TimerUtil.hasTimer(t) && !t.getPersistentData().contains(TICKRATE_MODIFIED));
+				MobEffectInstance instance = new MobEffectInstance(MobEffects.MOVEMENT_SLOWDOWN, 510, 100, false, false, false);
+				t.addEffect(instance);
+				for(int i = 0; i < this.secondsToSkip; i++)
 				{
-					MobEffectInstance instance = new MobEffectInstance(MobEffects.MOVEMENT_SLOWDOWN, 510, 100, false, false, false);
-					t.addEffect(new MobEffectInstance(instance));
-					t.getPersistentData().putBoolean(TICKRATE_MODIFIED, true);
-					TimerUtil.setTickrate(t, this.secondsToSkip * 20);
+					t.tick(); 
 				}
-			});*/
+			});
 			
 			int x = Mth.floor(p_41406_.getX());
             int z = Mth.floor(p_41406_.getZ());
@@ -166,7 +155,7 @@ public class TimeAcceleratorItem extends Item
         			this.accelerateBlockEntity(state, p_41405_, blockPos);
         			if(!p_41405_.isClientSide)
         			{
-            			this.accelerateRandomTick(state, p_41405_, blockPos);
+            			this.accelerateRandomTick(state.getBlock(), p_41405_, blockPos);
         			}
             	}
             }
@@ -202,17 +191,16 @@ public class TimeAcceleratorItem extends Item
 	}
 	
 	@SuppressWarnings("deprecation")
-	public boolean accelerateRandomTick(BlockState state, Level level, BlockPos pos)
+	public boolean accelerateRandomTick(Block block, Level level, BlockPos pos)
 	{
-		Block block = state.getBlock();
-    	if(block.isRandomlyTicking(state))
-    	{
-    		for(int n = 0; n < this.secondsToSkip * 20; n++)
-    		{
-    			block.randomTick(state, (ServerLevel)level, pos, level.random); 
-    		}
-    		return true;
-    	}
+		if(block.isRandomlyTicking(level.getBlockState(pos)))
+		{
+			for(int i = 0; i < this.secondsToSkip * 20; i++)
+			{
+				block.randomTick(level.getBlockState(pos), (ServerLevel) level, pos, level.random);
+			}
+			return true;
+		}
 		return false;
 	}
 	
