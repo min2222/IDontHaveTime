@@ -10,6 +10,7 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.network.protocol.game.ClientboundSetActionBarTextPacket;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.util.Mth;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.InteractionResultHolder;
@@ -71,23 +72,18 @@ public class TimeAcceleratorItem extends Item
 	    return InteractionResult.PASS;
 	}
 	
-	@SuppressWarnings("deprecation")
 	@Override
 	public InteractionResult useOn(UseOnContext p_41427_) 
 	{
 		Level level = p_41427_.getLevel();
-	    BlockState state = level.getBlockState(p_41427_.getClickedPos());
-	    Block block = state.getBlock();
+		BlockPos pos = p_41427_.getClickedPos();
+	    BlockState state = level.getBlockState(pos);
 	    if(!level.isClientSide)
 	    {
-	    	if(block.isRandomlyTicking(state))
+	    	if(this.accelerateRandomTick(state, level, pos))
 	    	{
-	    		for(int n = 0; n < this.secondsToSkip * 20; n++)
-	    		{
-	    			block.randomTick(state, (ServerLevel)level, p_41427_.getClickedPos(), level.random); 
-	    		}
-	    	} 
-	    	return InteractionResult.SUCCESS;
+		    	return InteractionResult.SUCCESS;
+	    	}
 	    }
 		return InteractionResult.PASS;
 	}
@@ -137,7 +133,7 @@ public class TimeAcceleratorItem extends Item
 			MobEffectInstance instance = new MobEffectInstance(MobEffects.MOVEMENT_SLOWDOWN, 510, 100, false, false, false);
 			p_41400_.addEffect(instance);
 			p_41400_.getPersistentData().putBoolean(TICKRATE_MODIFIED, true);
-			TimerUtil.setTickrate(p_41400_, this.secondsToSkip);
+			TimerUtil.setTickrate(p_41400_, this.secondsToSkip * 20);
 		}
 		return InteractionResult.SUCCESS;
 	}
@@ -149,17 +145,30 @@ public class TimeAcceleratorItem extends Item
 		{
 			List<LivingEntity> list = p_41405_.getEntitiesOfClass(LivingEntity.class, p_41406_.getBoundingBox().inflate(this.areaRadius, 0, this.areaRadius));
 			list.removeIf(t -> t instanceof Player || t == p_41406_ || t instanceof Monster || t instanceof Enemy);
-
-			for(LivingEntity living : list)
+			list.forEach(t -> 
 			{
-				if(!TimerUtil.hasTimer(living) && !living.getPersistentData().contains(TICKRATE_MODIFIED));
+				if(!TimerUtil.hasTimer(t) && !t.getPersistentData().contains(TICKRATE_MODIFIED));
 				{
 					MobEffectInstance instance = new MobEffectInstance(MobEffects.MOVEMENT_SLOWDOWN, 510, 100, false, false, false);
-					living.addEffect(new MobEffectInstance(instance));
-					living.getPersistentData().putBoolean(TICKRATE_MODIFIED, true);
-					TimerUtil.setTickrate(living, this.secondsToSkip);
+					t.addEffect(new MobEffectInstance(instance));
+					t.getPersistentData().putBoolean(TICKRATE_MODIFIED, true);
+					TimerUtil.setTickrate(t, this.secondsToSkip * 20);
 				}
-			}
+			});
+			
+			int x = Mth.floor(p_41406_.getX());
+            int z = Mth.floor(p_41406_.getZ());
+
+            for(int i = -this.areaRadius; i <= this.areaRadius; ++i)
+            {
+            	for(int i2 = -this.areaRadius; i2 <= this.areaRadius; ++i2)
+            	{
+        			BlockPos blockPos = new BlockPos(x + i, p_41406_.getY(), z + i2);
+        			BlockState state = p_41405_.getBlockState(blockPos);
+        			this.accelerateBlockEntity(state, p_41405_, blockPos);
+        			this.accelerateRandomTick(state, p_41405_, blockPos);
+            	}
+            }
 		}
 	}
 	
@@ -189,6 +198,21 @@ public class TimeAcceleratorItem extends Item
 			return AccelerationMode.AREA;
 		}
 		return AccelerationMode.SINGLE;
+	}
+	
+	@SuppressWarnings("deprecation")
+	public boolean accelerateRandomTick(BlockState state, Level level, BlockPos pos)
+	{
+		Block block = state.getBlock();
+    	if(block.isRandomlyTicking(state))
+    	{
+    		for(int n = 0; n < this.secondsToSkip * 20; n++)
+    		{
+    			block.randomTick(state, (ServerLevel)level, pos, level.random); 
+    		}
+    		return true;
+    	}
+		return false;
 	}
 	
 	@SuppressWarnings("unchecked")
