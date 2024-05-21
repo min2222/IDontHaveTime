@@ -18,8 +18,6 @@ import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
-import net.minecraft.world.entity.monster.Enemy;
-import net.minecraft.world.entity.monster.Monster;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.CreativeModeTab;
 import net.minecraft.world.item.Item;
@@ -143,7 +141,7 @@ public class TimeAcceleratorItem extends Item
 	{
 		if(this.getAccelerationMode(p_41404_) == AccelerationMode.AREA)
 		{
-			List<LivingEntity> list = p_41405_.getEntitiesOfClass(LivingEntity.class, p_41406_.getBoundingBox().inflate(this.areaRadius, 0, this.areaRadius));
+			/*List<LivingEntity> list = p_41405_.getEntitiesOfClass(LivingEntity.class, p_41406_.getBoundingBox().inflate(this.areaRadius, 0, this.areaRadius));
 			list.removeIf(t -> t instanceof Player || t == p_41406_ || t instanceof Monster || t instanceof Enemy);
 			list.forEach(t -> 
 			{
@@ -154,7 +152,7 @@ public class TimeAcceleratorItem extends Item
 					t.getPersistentData().putBoolean(TICKRATE_MODIFIED, true);
 					TimerUtil.setTickrate(t, this.secondsToSkip * 20);
 				}
-			});
+			});*/
 			
 			int x = Mth.floor(p_41406_.getX());
             int z = Mth.floor(p_41406_.getZ());
@@ -166,7 +164,10 @@ public class TimeAcceleratorItem extends Item
         			BlockPos blockPos = new BlockPos(x + i, p_41406_.getY(), z + i2);
         			BlockState state = p_41405_.getBlockState(blockPos);
         			this.accelerateBlockEntity(state, p_41405_, blockPos);
-        			this.accelerateRandomTick(state, p_41405_, blockPos);
+        			if(!p_41405_.isClientSide)
+        			{
+            			this.accelerateRandomTick(state, p_41405_, blockPos);
+        			}
             	}
             }
 		}
