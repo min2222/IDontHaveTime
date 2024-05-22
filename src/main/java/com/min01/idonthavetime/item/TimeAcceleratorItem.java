@@ -67,7 +67,7 @@ public class TimeAcceleratorItem extends Item
 		{
 			return InteractionResult.SUCCESS;
 		}
-		if(!level.isClientSide && this.accelerateRandomTick(state.getBlock(), level, pos))
+		if(!level.isClientSide && this.accelerateRandomTick(state.getBlock(), state, level, pos))
 		{
 			return InteractionResult.SUCCESS;
 		}
@@ -119,14 +119,17 @@ public class TimeAcceleratorItem extends Item
 		{
 			MobEffectInstance instance = new MobEffectInstance(MobEffects.MOVEMENT_SLOWDOWN, 510, 100, false, false, false);
 			p_41400_.addEffect(instance);
-			for(int i = 0; i < this.secondsToSkip * 10; i++)
+			int i = 0;
+			while(i < this.secondsToSkip)
 			{
-				p_41400_.tick(); 
+				p_41400_.tick();
+				i++;
 			}
 		}
 		return InteractionResult.SUCCESS;
 	}
 	
+	@SuppressWarnings("deprecation")
 	@Override
 	public void inventoryTick(ItemStack p_41404_, Level p_41405_, Entity p_41406_, int p_41407_, boolean p_41408_) 
 	{
@@ -138,26 +141,41 @@ public class TimeAcceleratorItem extends Item
 			{
 				MobEffectInstance instance = new MobEffectInstance(MobEffects.MOVEMENT_SLOWDOWN, 510, 100, false, false, false);
 				t.addEffect(instance);
-				for(int i = 0; i < this.secondsToSkip; i++)
+				int i = 0;
+				while(i < this.secondsToSkip)
 				{
 					t.tick();
+					i++;
 				}
 			});
 			
 			int x = Mth.floor(p_41406_.getX());
+            int y = Mth.floor(p_41406_.getY());
             int z = Mth.floor(p_41406_.getZ());
 
             for(int i = -this.areaRadius; i <= this.areaRadius; ++i)
             {
             	for(int i2 = -this.areaRadius; i2 <= this.areaRadius; ++i2)
             	{
-        			BlockPos blockPos = new BlockPos(x + i, p_41406_.getY(), z + i2);
-        			BlockState state = p_41405_.getBlockState(blockPos);
-        			this.accelerateBlockEntity(state, p_41405_, blockPos);
-        			if(!p_41405_.isClientSide)
-        			{
-            			this.accelerateRandomTick(state.getBlock(), p_41405_, blockPos);
-        			}
+                	for(int i3 = -this.areaRadius; i3 <= this.areaRadius; ++i3)
+                	{
+            			BlockPos blockPos = new BlockPos(x + i, y + i2, z + i3);
+            			BlockState state = p_41405_.getBlockState(blockPos);
+            			Block block = state.getBlock();
+            			this.accelerateBlockEntity(state, p_41405_, blockPos);
+            			if(!p_41405_.isClientSide)
+            			{
+            				if(block.isRandomlyTicking(state))
+            				{
+            					int i4 = 0;
+            					while(i4 < this.secondsToSkip)
+            					{
+            						block.randomTick(state, (ServerLevel) p_41405_, blockPos, p_41405_.random);
+            						i4++;
+            					}
+            				}
+            			}
+                	}
             	}
             }
 		}
@@ -192,13 +210,15 @@ public class TimeAcceleratorItem extends Item
 	}
 	
 	@SuppressWarnings("deprecation")
-	public boolean accelerateRandomTick(Block block, Level level, BlockPos pos)
+	public boolean accelerateRandomTick(Block block, BlockState state, Level level, BlockPos pos)
 	{
-		if(block.isRandomlyTicking(level.getBlockState(pos)))
+		if(block.isRandomlyTicking(state))
 		{
-			for(int i = 0; i < this.secondsToSkip * 10; i++)
+			int i = 0;
+			while(i < this.secondsToSkip)
 			{
 				block.randomTick(level.getBlockState(pos), (ServerLevel) level, pos, level.random);
+				i++;
 			}
 			return true;
 		}
@@ -215,9 +235,11 @@ public class TimeAcceleratorItem extends Item
 			BlockEntityTicker<BlockEntity> ticker = (BlockEntityTicker<BlockEntity>) blockEntity.getBlockState().getTicker(level, blockEntity.getType());
 			if(ticker != null)
 			{
-				for(int i = 0; i < this.secondsToSkip * 10; i++)
+				int i = 0;
+				while(i < this.secondsToSkip)
 				{
-					ticker.tick(level, pos, blockEntity.getBlockState(), blockEntity); 
+					ticker.tick(level, pos, blockEntity.getBlockState(), blockEntity);
+					i++;
 				}
 				return true;
 			}
