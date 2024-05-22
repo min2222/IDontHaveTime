@@ -36,7 +36,6 @@ public class TimeAcceleratorItem extends Item
 	protected int secondsToSkip = 500;
 	protected int areaRadius = 5;
 	public static final String TICKRATE = "Tickrate";
-	public static final String TICKRATE_MODIFIED = "TickrateModified";
 	
 	public enum AccelerationMode
 	{
@@ -115,12 +114,12 @@ public class TimeAcceleratorItem extends Item
 		{
 			return InteractionResult.PASS;
 		}
-		if(!(p_41400_ instanceof Player) && !p_41400_.getPersistentData().contains(TICKRATE_MODIFIED))
+		if(!(p_41400_ instanceof Player))
 		{
 			MobEffectInstance instance = new MobEffectInstance(MobEffects.MOVEMENT_SLOWDOWN, 510, 100, false, false, false);
 			p_41400_.addEffect(instance);
 			int i = 0;
-			while(i < this.secondsToSkip)
+			while(i < this.secondsToSkip * 20)
 			{
 				p_41400_.tick();
 				i++;
@@ -215,7 +214,7 @@ public class TimeAcceleratorItem extends Item
 		if(block.isRandomlyTicking(state))
 		{
 			int i = 0;
-			while(i < this.secondsToSkip)
+			while(i < this.secondsToSkip * 20)
 			{
 				block.randomTick(level.getBlockState(pos), (ServerLevel) level, pos, level.random);
 				i++;
@@ -236,7 +235,7 @@ public class TimeAcceleratorItem extends Item
 			if(ticker != null)
 			{
 				int i = 0;
-				while(i < this.secondsToSkip)
+				while(i < this.secondsToSkip * 20)
 				{
 					ticker.tick(level, pos, blockEntity.getBlockState(), blockEntity);
 					i++;
