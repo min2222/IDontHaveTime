@@ -78,9 +78,10 @@ public class TimeAcceleratorItem extends Item
 	public InteractionResultHolder<ItemStack> use(Level p_41432_, Player p_41433_, InteractionHand p_41434_) 
 	{
 	    ItemStack stack = p_41433_.getMainHandItem();
-	    CompoundTag tag = stack.getOrCreateTag();
+	    CompoundTag tag = stack.getTag();
 	    if(p_41433_.pick(p_41433_.getAttackRange(), 0, true).getType() == Type.MISS)
 	    {
+	    	this.checkIfHasNbt(p_41433_, stack);
 		    if(p_41433_.isShiftKeyDown())
 		    {
 		    	if(tag.getInt(TICKRATE) > 11) 
@@ -118,7 +119,7 @@ public class TimeAcceleratorItem extends Item
 		{
 			MobEffectInstance instance = new MobEffectInstance(MobEffects.MOVEMENT_SLOWDOWN, 510, 100, false, false, false);
 			p_41400_.addEffect(instance);
-			for(int i = 0; i < this.secondsToSkip * 20; i++)
+			for(int i = 0; i < this.secondsToSkip * 10; i++)
 			{
 				p_41400_.tick(); 
 			}
@@ -139,7 +140,7 @@ public class TimeAcceleratorItem extends Item
 				t.addEffect(instance);
 				for(int i = 0; i < this.secondsToSkip; i++)
 				{
-					t.tick(); 
+					t.tick();
 				}
 			});
 			
@@ -195,7 +196,7 @@ public class TimeAcceleratorItem extends Item
 	{
 		if(block.isRandomlyTicking(level.getBlockState(pos)))
 		{
-			for(int i = 0; i < this.secondsToSkip * 20; i++)
+			for(int i = 0; i < this.secondsToSkip * 10; i++)
 			{
 				block.randomTick(level.getBlockState(pos), (ServerLevel) level, pos, level.random);
 			}
@@ -214,7 +215,7 @@ public class TimeAcceleratorItem extends Item
 			BlockEntityTicker<BlockEntity> ticker = (BlockEntityTicker<BlockEntity>) blockEntity.getBlockState().getTicker(level, blockEntity.getType());
 			if(ticker != null)
 			{
-				for(int i = 0; i < this.secondsToSkip * 20; i++)
+				for(int i = 0; i < this.secondsToSkip * 10; i++)
 				{
 					ticker.tick(level, pos, blockEntity.getBlockState(), blockEntity); 
 				}
@@ -222,6 +223,20 @@ public class TimeAcceleratorItem extends Item
 			}
 		}
 		return false;
+	}
+	
+	public void checkIfHasNbt(Player player, ItemStack stack) 
+	{
+		if(!stack.hasTag())
+		{
+			CompoundTag tag = new CompoundTag();
+			tag.putInt(TICKRATE, 10);
+			stack.setTag(tag);
+		}
+		else
+		{
+			this.secondsToSkip = stack.getTag().getInt(TICKRATE);
+		}
 	}
 	
 	@Override
