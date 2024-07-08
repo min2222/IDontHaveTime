@@ -2,6 +2,8 @@ package com.min01.idonthavetime.item;
 
 import java.util.List;
 
+import com.min01.idonthavetime.config.IDontHaveTimeConfig;
+
 import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
@@ -33,8 +35,8 @@ import net.minecraft.world.phys.HitResult.Type;
 
 public class TimeAcceleratorItem extends Item
 {
-	protected int secondsToSkip = 500;
-	protected int areaRadius = 5;
+	protected int secondsToSkip = 10;
+	protected int areaRadius = IDontHaveTimeConfig.accelerateRadius.get();
 	public static final String TICKRATE = "Tickrate";
 	
 	public enum AccelerationMode
