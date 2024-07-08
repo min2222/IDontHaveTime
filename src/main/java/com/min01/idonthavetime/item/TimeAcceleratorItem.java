@@ -21,7 +21,6 @@ import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.monster.Enemy;
 import net.minecraft.world.entity.monster.Monster;
 import net.minecraft.world.entity.player.Player;
-import net.minecraft.world.item.CreativeModeTab;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.TooltipFlag;
@@ -54,7 +53,7 @@ public class TimeAcceleratorItem extends Item
 	
 	public TimeAcceleratorItem() 
 	{
-		super(new Item.Properties().fireResistant().stacksTo(1).tab(CreativeModeTab.TAB_TOOLS));
+		super(new Item.Properties().fireResistant().stacksTo(1));
 	}
 	
 	@Override
@@ -80,7 +79,7 @@ public class TimeAcceleratorItem extends Item
 	{
 	    ItemStack stack = p_41433_.getMainHandItem();
 	    CompoundTag tag = stack.getTag();
-	    if(p_41433_.pick(p_41433_.getAttackRange(), 0, true).getType() == Type.MISS)
+	    if(p_41433_.pick(p_41433_.getBlockReach(), 0, true).getType() == Type.MISS)
 	    {
 	    	this.checkIfHasNbt(p_41433_, stack);
 		    if(p_41433_.isShiftKeyDown())
@@ -111,7 +110,7 @@ public class TimeAcceleratorItem extends Item
 	@Override
 	public InteractionResult interactLivingEntity(ItemStack p_41398_, Player p_41399_, LivingEntity p_41400_, InteractionHand p_41401_) 
 	{
-		Level level = p_41399_.level;
+		Level level = p_41399_.level();
 		if(level.isClientSide)
 		{
 			return InteractionResult.PASS;
